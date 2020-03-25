@@ -1,7 +1,19 @@
+# output folder
+out/*
+
+# lexicon-thai
+lexicon-thai/
+
+# config.cfg
+config.cfg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# vscode folder
+.vscode/
 
 # C extensions
 *.so
