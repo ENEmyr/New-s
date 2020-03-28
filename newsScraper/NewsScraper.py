@@ -146,6 +146,7 @@ class NewsScraper(Scraper):
             publisher_name = self._filter(url)
             if bool(publisher_name):
                 scraped_data = self.__scraper[publisher_name].scrape(url)
-                if len(scraped_data) >= 0:
-                    scraped_list.append(scraped_data[0])
+                if len(scraped_data) > 0:
+                    tmp_dict = dict(scraped_data[0]) # for some reason if not do this filtered_data will point to old memory address
+                    scraped_list.append(tmp_dict)
         return scraped_list

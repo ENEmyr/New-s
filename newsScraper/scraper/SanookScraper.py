@@ -157,5 +157,6 @@ class SanookScraper(Scraper):
                 except ValueError as err:
                     continue
                 if bool(filtered_data) :
-                    filtered_list.append(filtered_data)
+                    tmp_dict = dict(filtered_data) # for some reason if not do this filtered_data will point to old memory address
+                    filtered_list.append(tmp_dict)
         return filtered_list
