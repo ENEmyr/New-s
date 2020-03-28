@@ -68,7 +68,7 @@ class SanookScraper(Scraper):
                 url = f"{self.__NEWS_SITE}{node['id']}"
                 traced_urls.append(url)
         self.urls = traced_urls
-        return self.urls
+        return traced_urls
     
     def _filter(self, data:dict) -> dict:
         """Filter a raw scraped data and give the clean one after processed
@@ -127,18 +127,19 @@ class SanookScraper(Scraper):
         if urls == None and len(self.urls) == 0:
             return []
         elif isinstance(urls, str):
-            self.urls = [urls]
+            urls = [urls]
         elif isinstance(urls, list):
-            self.urls = urls
+            urls = urls
         else:
             urls = self.urls
         filtered_list = []
         qparam_operationName = 'getEntryWithGallery'
         qparam_extensions = '{"persistedQuery":{"version":1,"sha256Hash":"2d493971ae139330de9de1c8e8494561d27b2d11"}}'
         for url in urls:
-            url = url.split('/')
-            if bool(re.match('[0-9]{7}$', url[4])) and (url[2] == 'www.sanook.com' or url[2] == 'sanook.com') and url[3] == 'news':
-                id = url[4]
+            url_matcher = re.compile(r'^(http://|https://|https://www\.|http://www\.)sanook\.com/news/[0-9]{7}(/|)$').match
+            id_matcher = re.compile(r'[0-9]{7}').search
+            if bool(url_matcher(url)):
+                id = id_matcher(url).group()
             else:
                 raise ValueError('Invalid url')
             qparam_variables = '{"id":"'+str(id)+'","channel":"news","relatedLimit":5,"relatedGalleryFirst":6,"oppaChannel":"news","oppaCategorySlugs":[]}'

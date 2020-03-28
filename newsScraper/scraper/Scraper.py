@@ -208,8 +208,8 @@ class Scraper(ABC):
         if urls == None and len(self.urls) == 0:
             return []
         elif isinstance(urls, str):
-            self.urls = [urls]
+            urls = [urls]
         elif isinstance(urls, list):
-            self.urls = urls
+            urls = urls
         else:
             urls = self.urls
