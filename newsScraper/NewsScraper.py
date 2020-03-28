@@ -41,16 +41,16 @@ class NewsScraper(Scraper):
         """        
         return self.__PUBLISHER_NAME
 
-    def set_publisher(self, *args:str) -> None:
+    def set_publisher(self, *args:Tuple[str]) -> None:
         """Use to set up publisher targets to scrape a news
 
         Parameters
         ----------
-        *args : str
+        *args : Tuple[str]
             tuple of publisher name that available in PUBLISHER_NAME
         """        
         for key in self.__PUBLISHERS:
-            if key in self.args:
+            if key in args:
                 self.__PUBLISHERS[key] = True
             else:
                 self.__PUBLISHERS[key] = False
