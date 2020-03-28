@@ -133,7 +133,7 @@ class Scraper(ABC):
         List[str]
             list of news url that used to scrape a news data
         """        
-        return self.__urls
+        return self.__urls.copy()
 
     @urls.setter
     def urls(self, new_urls:List[str]) -> None:
