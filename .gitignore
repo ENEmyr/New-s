@@ -1,5 +1,6 @@
-# test .ipynb
+# test file
 *.ipynb
+tmp.py
 
 # output folder
 out/*
