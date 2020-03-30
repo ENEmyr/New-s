@@ -37,7 +37,7 @@ class Summarizer(ABC):
         compression_rate = compression_rate if compression_rate <= 1 and compression_rate >= 0 else 0.65
         self.__ratio = 1 - compression_rate # raio of output sentences
         self.__document = ''
-        self.__sentences = []
+        self._sentences = []
         self.__lang = lang
         self.__total_sentences = 0
         self.__all_words = []
@@ -110,14 +110,14 @@ class Summarizer(ABC):
         """        
         return get_stem(word, self.__lang)
 
-    def remove_stopwords(self, words:List[str], remove_unknown:bool = False) -> List[str]:
+    def remove_stopwords(self, words:List[str], allow_unknown:bool = True) -> List[str]:
         """Remove words which have very little meaning or similar words from given list
         
         Parameters
         ----------
         words : List[str]
             a list of word
-        remove_unknown : bool, optional
+        allow_unknown : bool, optional
             a flag that determine whether or not to remove unknown word, by default False
         
         Returns
@@ -126,11 +126,11 @@ class Summarizer(ABC):
             a list of removed stopwords
         """        
         stopwords_set = stopwords(self.__lang)
-        if remove_unknown:
+        if allow_unknown:
             new_words = list(filter(lambda word: not word in stopwords_set, words))
-            new_words = list(filter(lambda word: not word in thai_words(), new_words))
         else:
             new_words = list(filter(lambda word: not word in stopwords_set, words))
+            new_words = list(filter(lambda word: word in thai_words(), new_words))
         return new_words
 
     def sentence_segment(self, document:str, remove_newline:bool = True, with_tag:bool = False) -> Union[List[dict], List[str]]:
@@ -141,7 +141,7 @@ class Summarizer(ABC):
         document : str
             document that need to be split
         remove_newline : bool, optional
-            a flag that determine whether or not to replace '\n' to ' ', by default True
+            a flag that determine whether or not to replace '\\n' to ' ', by default True
         with_tag : bool, optional
             a flag that determine whether or not to return a word tag as a result, by default False
         
@@ -150,8 +150,8 @@ class Summarizer(ABC):
         Union[List[dict], List[str]]
             list of sentences or list of dictionary that contains segmented document and a list of word with its tag
         """        
-        self.__sentences = sent_seg(document, remove_newline, with_tag)
-        return self.__sentences.copy()
+        self._sentences = sent_seg(document, remove_newline, with_tag)
+        return self._sentences.copy()
     
     def merge_sentences(self, sentences:List[str] = []) -> str:
         """Combine given list of sentences into a string
@@ -171,10 +171,10 @@ class Summarizer(ABC):
         ValueError
             can't find any sentences to merge
         """        
-        if len(sentences) == 0 and len(self.__sentences) == 0:
+        if len(sentences) == 0 and len(self._sentences) == 0:
             raise ValueError('Sentences not found')
         merged = ''
-        sentences = sentences if len(sentences) != 0 else self.__sentences
+        sentences = sentences if len(sentences) != 0 else self._sentences
         if type(sentences[0]) != str:
             for sent in sentences:
                 merged += sent.content+'\n'
@@ -277,7 +277,7 @@ class Summarizer(ABC):
             'double_k',
             'log'
         ]
-        sentences = sentences if bool(sentences) else self.__sentences
+        sentences = sentences if bool(sentences) else self._sentences
         k = k if k <= 1 and k >= 0 else 0.5
         if not bool(sentences):
             raise ValueError('Sentences not found')
@@ -312,7 +312,7 @@ class Summarizer(ABC):
                     lambda item: (item[0], item[1]), 
                     sent_word_count.items())) # Raw count
             words_freq.append(sent_word_count)
-        if sentences == self.__sentences:
+        if sentences == self._sentences:
             self.__all_words = ','.join(list(map(
                 lambda x: ','.join(list(x.keys())), 
                 words_freq))).split(',')
@@ -354,7 +354,7 @@ class Summarizer(ABC):
         """        
         if self.__total_sentences == 0 or len(self.__all_words) == 0:
             raise ValueError("Sentences required")
-        words = sentence.keys()
+        words = list(sentence.keys())
         n_sent_vector = np.array(list(map(lambda word: self.__all_words.count(word), words))) # vector of no. of sentence that contain word i
         idf_smooth_vector = np.log(self.__total_sentences/(1+n_sent_vector))+1 #inverse document frequency smooth of sentence sent
         return idf_smooth_vector
@@ -394,9 +394,9 @@ class Summarizer(ABC):
         return tf_vector.dot(idf_vector)
 
     @abstractmethod
-    def _extract_importance_sentences(self) -> List[str]:
+    def _extract_importance_sentences(self, weighted_sentences:List[Tuple[int, float]], merge:bool = False) -> Union[List[str], str]:
         pass
 
     @abstractmethod
-    def summarize(self, document:str) -> List[str]:
+    def summarize(self, document:str, merge_sentences:bool = False) -> Union[List[str], str]:
         pass
