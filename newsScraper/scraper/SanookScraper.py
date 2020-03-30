@@ -94,16 +94,23 @@ class SanookScraper(Scraper):
         year, month, day, hour, minute = int(year), int(month), int(day), int(hour), int(minute)
         dt_isoformat = datetime(year, month, day, hour, minute).isoformat('T')+'Z' # create datetime according to RFC3339 format
         content = BeautifulSoup(data['body'][0], features='html.parser').getText() # clean html tag with beautiful soup
-        self._scraped_data['title'] = data['title'] or 'Undefined'
+        
+        self._scraped_data['title'] = data['title'] or 'Untitled'
         self._scraped_data['coverImage'] = data['thumbnail'] or 'Undefined'
         self._scraped_data['content'] = content
         self._scraped_data['publisher'] = 'Sanook'
-        self._scraped_data['author'] = data['author']['name'] or data['author']['realName'] or 'Sanook'
         self._scraped_data['language'] = ['th']
         self._scraped_data['tags'] = data['tags'] or []
-        self._scraped_data['category'] = data['primaryCategory']['name'] or 'Undefined'
         self._scraped_data['publishAt'] = dt_isoformat
         self._scraped_data['sourceUrl'] = sanook_url
+        try:
+            self._scraped_data['category'] = data['primaryCategory']['name'] or 'Undefined'
+        except:
+            self._scraped_data['category'] = 'Undefined'
+        try:
+            self._scraped_data['author'] = data['author']['name'] or data['author']['realName'] or 'Sanook'
+        except:
+            self._scraped_data['author'] = 'Sanook'
         return self._scraped_data
     
     def scrape(self, urls:Union[str, List[str]] = None) -> List[dict]:
