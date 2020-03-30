@@ -285,6 +285,7 @@ class Summarizer(ABC):
         for sent in sentences:
             words = self.word_tokenize(sent)
             words = self.remove_stopwords(words, allow_unknown)
+            words = list(map(lambda word: self.stem(word), words)) # word steming
             word_set = set(words)
             normalize_factor = 0
             sent_word_count = {}
