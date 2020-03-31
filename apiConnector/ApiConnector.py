@@ -21,6 +21,17 @@ class ApiConnector:
                           'Authorization': 'Bearer {}'.format(self.__token)}
     
     @property
+    def PASS_STATUS(self) -> dict:
+        """Show all pass html status code
+        
+        Returns
+        -------
+        dict
+            dictionary that have a status code as a key and status text as a value
+        """        
+        return self.__PASS_STATUS.copy()
+
+    @property
     def MODEL_LISTS(self):
         """Show all models available to set
         
@@ -37,7 +48,7 @@ class ApiConnector:
         Parameters
         ----------
         model : str
-            name of model
+            name of model, ['raw', 'summarized']
         
         Returns
         -------

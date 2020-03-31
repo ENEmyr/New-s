@@ -2,7 +2,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, Tuple
 from newsScraper.scraper.Scraper import Scraper
 
 class SanookScraper(Scraper):
@@ -22,7 +22,7 @@ class SanookScraper(Scraper):
         """        
         return "https://graph.sanook.com"
 
-    def trace(self, limit:int = 0, checkpoint:str = '') -> List[str]:
+    def trace(self, limit:int = 0, checkpoint:str = '') -> Tuple[List[str], str]:
         """Trace all news urls since given checkpoint until reach the given limit
         
         Parameters
@@ -34,14 +34,15 @@ class SanookScraper(Scraper):
         
         Returns
         -------
-        List[str]
-            list of traced news urls
+        Tuple[List[str], str]
+            list of traced news urls and latest news id
 
         Raises
         ------
         Exception 'Call Sanook Api failed'
             Occur when got bad status code from api or failed when tried to decode a response as json
         """        
+        latest_news_id = ''
         limit = self.MAX_TRACE_LIMIT if limit == 0 else limit
         qparam_operationName = 'getArchiveEntries'
         qparam_variables = '{"oppaChannel":"news","oppaCategorySlugs":[],"channels":["news"],"notInCategoryIds":[{"channel":"news","ids":[1681,6050,6051,6052,6053,6054,6055,6510,6506,6502]}],"orderBy":{"field":"CREATED_AT","direction":"DESC"},"first":'+str(limit)+',"offset":0,"after":"Y3Vyc29yOjE5"}'
@@ -62,13 +63,14 @@ class SanookScraper(Scraper):
         traced_urls = []
         for edge in edges:
             node = edge['node']
+            latest_news_id = node['id']
             if checkpoint != '' and node['id'] == checkpoint:
                 break
             else:
                 url = f"{self.__NEWS_SITE}{node['id']}"
                 traced_urls.append(url)
         self.urls = traced_urls
-        return traced_urls
+        return traced_urls, latest_news_id
     
     def _filter(self, data:dict) -> dict:
         """Filter a raw scraped data and give the clean one after processed
@@ -96,7 +98,7 @@ class SanookScraper(Scraper):
         content = BeautifulSoup(data['body'][0], features='html.parser').getText() # clean html tag with beautiful soup
         
         self._scraped_data['title'] = data['title'] or 'Untitled'
-        self._scraped_data['coverImage'] = data['thumbnail'] or 'Undefined'
+        self._scraped_data['imageUrl'] = data['thumbnail'] or 'Undefined'
         self._scraped_data['content'] = content
         self._scraped_data['publisher'] = 'Sanook'
         self._scraped_data['language'] = ['th']

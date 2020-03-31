@@ -1,6 +1,6 @@
 import re
 from types import SimpleNamespace
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 from newsScraper.scraper.SanookScraper import SanookScraper
 from newsScraper.scraper.Scraper import Scraper
 
@@ -70,7 +70,7 @@ class NewsScraper(Scraper):
                 base_urls[key] = self.__scraper[key].base_url
         return base_urls
 
-    def trace(self, limit:int = 0, checkpoint:dict = {}) -> List[str]:
+    def trace(self, limit:int = 0, checkpoint:dict = {}) -> Tuple[List[str], Dict[str, str]]:
         """Trace all news urls from all publisher since given checkpoint until reach the given limit
         
         Parameters
@@ -82,8 +82,8 @@ class NewsScraper(Scraper):
         
         Returns
         -------
-        List[str]
-            list of traced news urls
+        Tuple[List[str], Dict[str, str]]
+            list of traced news urls and dictionary that represent a pair between publisher name and latest news id
 
         Raises
         ------
@@ -92,15 +92,17 @@ class NewsScraper(Scraper):
         """     
         if not all([x in self.__scraper.keys() for x in checkpoint]):
             raise ValueError("Invalid Key of checkpoint")
+        latest_news_ids = {}
         limit = self.MAX_TRACE_LIMIT if limit == 0 else limit
         traced_urls = []
         for key in self.__scraper:
             if self.__PUBLISHERS[key]:
                 cp = "" if not key in checkpoint else checkpoint[key]
-                urls = self.__scraper[key].trace(limit=self.MAX_TRACE_LIMIT, checkpoint=cp)
+                urls, latest_news_id = self.__scraper[key].trace(limit=self.MAX_TRACE_LIMIT, checkpoint=cp)
+                latest_news_ids[key] = latest_news_id
                 traced_urls += urls
         self.urls = traced_urls
-        return traced_urls
+        return traced_urls, latest_news_ids
     
     def _filter(self, data:str) -> str:
         """Identify publisher from given url

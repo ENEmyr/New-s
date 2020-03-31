@@ -18,7 +18,7 @@ class ScrapeData(dict):
         """        
         LEGAL_KEY_LIST = [
             "title",
-            "coverImage",
+            "imageUrl",
             "content",
             "publisher",
             "author",
@@ -77,7 +77,7 @@ class Scraper(ABC):
         """        
         self._scraped_data = ScrapeData({
             "title":"",
-            "coverImage":"",
+            "imageUrl":"",
             "content":"",
             "author":"",
             "publisher":"",
@@ -158,7 +158,7 @@ class Scraper(ABC):
             raise ValueError('Invalid urls')
     
     @abstractmethod
-    def trace(self, limit:int = 0, checkpoint:str = '') -> List[str]:
+    def trace(self, limit:int = 0, checkpoint:str = '') -> Tuple[List[str], str]:
         """Trace all news urls since given checkpoint until reach the given limit
         
         Parameters
@@ -170,8 +170,8 @@ class Scraper(ABC):
         
         Returns
         -------
-        List[str]
-            list of traced news urls
+        Tuple[List[str], str]
+            list of traced news urls and latest news id
         """        
         limit = self.MAX_TRACE_LIMIT if limit == 0 else limit
 
