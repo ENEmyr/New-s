@@ -110,7 +110,7 @@ class News:
             while True:
                 asyncio.run(self.__auto_scrape())
                 asyncio.run(self.__auto_summarize())
-                time.sleep(1)
+                time.sleep(self.__delay)
         except KeyboardInterrupt:
             print("System closed.")
         return self.__checkpoints
