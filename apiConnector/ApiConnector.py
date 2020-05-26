@@ -151,7 +151,7 @@ class ApiConnector:
             res_data = response.text
         return response.status_code, res_data
 
-    async def post(self, payload: dict) -> Tuple[int, str]:
+    def post(self, payload: dict) -> Tuple[int, str]:
         """Send post request to API services according to current model
         
         Parameters
@@ -169,7 +169,7 @@ class ApiConnector:
         response = requests.post(reqUrl, json=payload, headers=self.__headers)
         return self.__returnRes(response)
     
-    async def get(self, payload:dict) -> Tuple[int, List[dict]]:
+    def get(self, payload:dict) -> Tuple[int, List[dict]]:
         """Send get request to API services according to current model
         
         Parameters
@@ -198,7 +198,7 @@ class ApiConnector:
             raise Exception('Model not found')
         return self.__returnRes(response)
 
-    async def put(self, id: str, payload: dict) -> Tuple[int, str]:
+    def put(self, id: str, payload: dict) -> Tuple[int, str]:
         """Send put request to API services according to current model
         
         Parameters
@@ -218,7 +218,7 @@ class ApiConnector:
         response = requests.put(reqUrl, json=payload, headers=self.__headers)
         return self.__returnRes(response)
     
-    async def delete(self, id: str) -> Tuple[int, str]:
+    def delete(self, id: str) -> Tuple[int, str]:
         """Send delete request to API services according to current model
         
         Parameters

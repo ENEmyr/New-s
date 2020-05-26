@@ -1,5 +1,5 @@
-import collections
-import re
+import collections, re, random, requests
+from bs4 import BeautifulSoup
 from typing import List, Tuple, Union
 from abc import ABC, abstractmethod
 
@@ -89,6 +89,13 @@ class Scraper(ABC):
         })
         self.__urls = [],
         self.__MAX_TRACE_LIMIT = max_trace_limit
+        self.__HEADERS_LIST = [
+            'Mozilla/5.0 (Windows; U; Windows NT 6.1; x64; fr; rv:1.9.2.13) Gecko/20101203 Firebird/3.6.13',
+            'Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko',
+            'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
+            'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16',
+            'Mozilla/5.0 (Windows NT 5.2; RW; rv:7.0a1) Gecko/20091211 SeaMonkey/9.23a1pre'
+        ]
 
     @property
     def PASS_STATUS(self) -> List[int]:
@@ -100,6 +107,28 @@ class Scraper(ABC):
             list of successfully status code
         """        
         return [200, 204]
+    
+    @property
+    def HEADER_LIST(self) -> List[str]:
+        """Header of request
+        
+        Returns
+        -------
+        List[str]
+            list of request header 
+        """        
+        return self.__HEADERS_LIST
+
+    @property
+    def PROXY_URL(self) -> str:
+        """Url to find a proxy list
+        
+        Returns
+        -------
+        str
+            url of proxy collector website
+        """        
+        return 'https://free-proxy-list.net/'
 
     @property
     def MAX_TRACE_LIMIT(self) -> int:
@@ -213,3 +242,32 @@ class Scraper(ABC):
             urls = urls
         else:
             urls = self.urls
+
+    def random_header(self) -> dict:
+        """Random a heder that use for change request header
+        
+        Returns
+        -------
+        dict
+            A dictionary contains User-Agent
+        """        
+        return {'User-Agent': random.choice(self.__HEADERS_LIST)}
+    
+    def get_proxies(self) -> List[str]:
+        """Get a list of proxies that can be use for change request proxy
+        
+        Returns
+        -------
+        List[str]
+            A list of proxies
+        """        
+        res = requests.get(self.PROXY_URL)
+        soup = BeautifulSoup(res.text, 'lxml')
+        table = soup.find('table',id='proxylisttable')
+        list_tr = table.find_all('tr')
+        list_td = [elem.find_all('td') for elem in list_tr]
+        list_td = list(filter(None, list_td))
+        list_ip = [elem[0].text for elem in list_td]
+        list_ports = [elem[1].text for elem in list_td]
+        list_proxies = [':'.join(elem) for elem in list(zip(list_ip, list_ports))]
+        return list_proxies               

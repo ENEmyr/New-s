@@ -22,70 +22,98 @@ class News:
         self.__compression_rate = compression_rate
         self.__news_scraper = NewsScraper(max_trace_limit=trace_limit)
         self.__checkpoints = checkpoints if bool(checkpoints) else {
-            'sanook' : ''
+            'sanook' : []
         }
     
-    async def __update_checkpoint(self, latest_news_ids:Dict[str, str]) -> None:
+    def __update_checkpoint(self, latest_news_ids:Dict[str, str]) -> None:
         for publisher in latest_news_ids:
-            self.__checkpoints[publisher] = latest_news_ids[publisher]
+            latest_news = []
+            if len(latest_news_ids[publisher]) == 0:
+                continue
+            else:
+                for news_id in latest_news_ids[publisher]:
+                    if len(self.__checkpoints[publisher]) > 0:
+                        self.__checkpoints[publisher] = latest_news_ids[publisher]
+                    #if news_id not in self.__checkpoints:
+                    #    if len(self.__checkpoints[publisher]) > 0:
+                    #        self.__checkpoints[publisher].pop()
+                    #    self.__checkpoints[publisher].insert(0, news_id)
 
-    async def __auto_scrape(self, name=None, run_event=None):
+    def __auto_scrape(self, name=None, run_event=None):
+        print('Scraper worker is starting...')
         api_connector = ApiConnector()
-        #while run_event.is_set():
-        urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=self.__checkpoints)
-        if latest_news_ids['sanook'] != self.__checkpoints['sanook']:
-            scraped_news = self.__news_scraper.scrape()
-            await self.__update_checkpoint(latest_news_ids)
-            api_connector.setModel('raw')
-            for news in scraped_news:
-                status_code, status_text = await api_connector.post(news)
-                if not status_code in api_connector.PASS_STATUS:
-                    print("Bad status code at post raw news :", status_code)
-                    continue
-                else:
-                    print("Raw news pushed.")
-    
-    async def __auto_summarize(self, name=None, run_event=None):
-        failed_del_id = []
+        while run_event.is_set():
+            try:
+                urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=[])
+                if latest_news_ids['sanook'] != self.__checkpoints['sanook']:
+                    for news_id in latest_news_ids['sanook']:
+                        if news_id not in self.__checkpoints['sanook']:
+                            scraped_news = self.__news_scraper.scrape()
+                            api_connector.setModel('raw')
+                            for news in scraped_news:
+                                status_code, status_text = api_connector.post(news)
+                                if not status_code in api_connector.PASS_STATUS:
+                                    print("Bad status code at post raw news :", status_code)
+                                    continue
+                                else:
+                                    print("Raw news pushed.")
+                    self.__update_checkpoint(latest_news_ids)
+                print('Sleeping now')
+                time.sleep(self.__delay)
+            except:
+                pass
+
+    def __auto_summarize(self, name=None, run_event=None):
+        print('Summarize worker is starting...')
+        failed_mark_as_summarized = []
         raw_connector = ApiConnector()
         summarized_connector = ApiConnector()
         raw_connector.setModel('raw')
         summarized_connector.setModel('summarized')
-        #while run_event.is_set():
-        get_raw_params = {'limit':24}
-        status_code, raw_news = await raw_connector.get(get_raw_params)
-        if len(raw_news) != 0:
-            for news in raw_news:
-                if news['_id'] in failed_del_id:
-                    continue
-                del_id = news['_id']
-                summarized_news = summarize(news['content'], self.__compression_rate, lang='th', algorithm='text_rank')
-                news['content'] = summarized_news
-                del(news['_id'])
-                del(news['__v'])
-                del(news['insertDt'])
-                status_code, status_text = await summarized_connector.post(news)
-                if not status_code in summarized_connector.PASS_STATUS:
-                    print("Bad status code at post summarized news :", status_code)
-                    continue
-                else:
-                    print("Summarized news pushed")
-                status_code, status_text = await raw_connector.delete(del_id)
-                time.sleep(5)
-                if not status_code in raw_connector.PASS_STATUS:
-                    print("Bad status code at del raw news :", status_code)
-                    failed_del_id.append(del_id)
-                else:
-                    print("Delete raw news id {} completed".format(del_id))
-        if len(failed_del_id) != 0:
-            for i in range(0, len(failed_del_id)):
-                status_code, status_text = await raw_connector.delete(failed_del_id[i])
-                if not status_code in raw_connector.PASS_STATUS:
-                    print("Bad status code at del raw news :", status_code)
-                else:
-                    del(failed_del_id[i])
+        while run_event.is_set():
+            try:
+                get_raw_params = {'limit':24, 'summarizeStatus': 'false'}
+                status_code, raw_news = raw_connector.get(get_raw_params)
+                if len(raw_news) != 0:
+                    for news in raw_news:
+                        if type(news['_id']) != str:
+                            if news['_id'] in failed_mark_as_summarized:
+                                continue
+                        mark_as_summarized = news['_id']
+                        summarized_news = summarize(news['content'], self.__compression_rate, lang='th', algorithm=self.__summarize_algorithm)
+                        if len(summarized_news) == 0: # return nothing from summarize system
+                            try_different_algo = 'sentence_rank' if self.__summarize_algorithm == 'text_rank' else 'text_rank'
+                            summarized_news = summarize(news['content'], self.__compression_rate, lang='th', algorithm=try_different_algo)
+                        news['content'] = summarized_news if bool(summarized_news) else news['content']
+                        del(news['_id'])
+                        del(news['__v'])
+                        del(news['insertDt'])
+                        del(news['summarizeStatus'])
+                        status_code, status_text = summarized_connector.post(news)
+                        if not status_code in summarized_connector.PASS_STATUS:
+                            print("Bad status code at post summarized news :", status_code)
+                            continue
+                        else:
+                            print("Summarized news pushed")
+                        status_code, status_text = raw_connector.put(mark_as_summarized, {"summarizeStatus": 'true'})
+                        if not status_code in raw_connector.PASS_STATUS:
+                            print("Failed to re-assign summarizeStatus with bad code :", status_code)
+                            failed_mark_as_summarized.append(mark_as_summarized)
+                        else:
+                            print("Re-assign summarizeStatus completed on raw news id {}".format(mark_as_summarized))
+                if len(failed_mark_as_summarized) != 0:
+                    for i in range(0, len(failed_mark_as_summarized)):
+                        status_code, status_text = raw_connector.put(failed_mark_as_summarized[i], {"summarizeStatus": True})
+                        if not status_code in raw_connector.PASS_STATUS:
+                            print("Failed to re-assign summarizeStatus with bad code :", status_code)
+                        else:
+                            print("Re-assign summarizeStatus completed on raw news id {}".format(mark_as_summarized))
+                            del(failed_mark_as_summarized[i])
+                time.sleep(self.__delay/2)
+            except:
+                pass
     
-    # implement in progress
+    # in progress
     def run_tasks(self):
         run_event = threading.Event()
         run_event.set()
@@ -96,6 +124,7 @@ class News:
         print("System started.")
         try:
             while True:
+                #print('Delay...')
                 time.sleep(self.__delay)
         except KeyboardInterrupt:
             print("Closing system...")
@@ -103,6 +132,7 @@ class News:
             scraper_worker.join()
             summarier_worker.join()
             print("System closed.")
+        return self.__checkpoints
 
     def start(self):
         try:

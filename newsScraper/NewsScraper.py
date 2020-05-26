@@ -78,7 +78,7 @@ class NewsScraper(Scraper):
         limit : int, optional
             trace limit 0 is mean as much as possible, by default 0
         checkpoint : dict, optional
-            dictionary in pair of PUBLISHER_NAME and checkpoint, where checkpoint is mean the latest trace that can be a date-time format or news id, by default {}
+            dictionary in pair of PUBLISHER_NAME and checkpoint, where checkpoint is mean the latest trace that can be a date-time format or [news_id], by default {}
         
         Returns
         -------
@@ -97,9 +97,9 @@ class NewsScraper(Scraper):
         traced_urls = []
         for key in self.__scraper:
             if self.__PUBLISHERS[key]:
-                cp = "" if not key in checkpoint else checkpoint[key]
+                cp = [] if not key in checkpoint else checkpoint[key]
                 urls, latest_news_id = self.__scraper[key].trace(limit=self.MAX_TRACE_LIMIT, checkpoint=cp)
-                latest_news_ids[key] = latest_news_id
+                latest_news_ids[key] = list(latest_news_id)
                 traced_urls += urls
         self.urls = traced_urls
         return traced_urls, latest_news_ids

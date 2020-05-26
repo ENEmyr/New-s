@@ -11,5 +11,6 @@ model = {
     "publishAt": "",
     "from": "",
     "to": "",
-    "limit": ""
+    "limit": "",
+    "summarizeStatus": ""
 }

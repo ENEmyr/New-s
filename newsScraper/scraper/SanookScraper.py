@@ -2,14 +2,16 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Set
 from newsScraper.scraper.Scraper import Scraper
+from itertools import cycle
 
 class SanookScraper(Scraper):
     ''' News scraper for sanook '''
     def __init__(self, max_trace_limit:int = 100):
         super().__init__(max_trace_limit)
         self.__NEWS_SITE = 'https://www.sanook.com/news/'
+        self.__proxies_pool = cycle(self.get_proxies())
     
     @property
     def base_url(self) -> str:
@@ -22,19 +24,19 @@ class SanookScraper(Scraper):
         """        
         return "https://graph.sanook.com"
 
-    def trace(self, limit:int = 0, checkpoint:str = '') -> Tuple[List[str], str]:
+    def trace(self, limit:int = 0, checkpoint:List[str] = []) -> Tuple[Set[str], str]:
         """Trace all news urls since given checkpoint until reach the given limit
         
         Parameters
         ----------
         limit : int, optional
             trace limit 0 is mean as much as possible, by default 0
-        checkpoint : str, optional
-            news id that represent the latest trace, by default ''
+        checkpoint : List[str], optional
+            news id that represent the latest trace, by default []
         
         Returns
         -------
-        Tuple[List[str], str]
+        Tuple[Set[str], str]
             list of traced news urls and latest news id
 
         Raises
@@ -42,17 +44,17 @@ class SanookScraper(Scraper):
         Exception 'Call Sanook Api failed'
             Occur when got bad status code from api or failed when tried to decode a response as json
         """        
-        latest_news_id = ''
+        latest_news_ids = []
         limit = self.MAX_TRACE_LIMIT if limit == 0 else limit
         qparam_operationName = 'getArchiveEntries'
-        qparam_variables = '{"oppaChannel":"news","oppaCategorySlugs":[],"channels":["news"],"notInCategoryIds":[{"channel":"news","ids":[1681,6050,6051,6052,6053,6054,6055,6510,6506,6502]}],"orderBy":{"field":"CREATED_AT","direction":"DESC"},"first":'+str(limit)+',"offset":0,"after":"Y3Vyc29yOjE5"}'
+        qparam_variables = '{"oppaChannel":"news","oppaCategorySlugs":[],"channels":["news"],"notInCategoryIds":[{"channel":"news","ids":[]}],"orderBy":{"field":"CREATED_AT","direction":"DESC"},"first":'+str(limit)+',"offset":0,"after":"Y3Vyc29yOjE5"}'
         qparam_extensions = '{"persistedQuery":{"version":1,"sha256Hash":"f754ffc68eb4683990679d0154c39cb90b63d628"}}'
         qparams = {
             'operationName':qparam_operationName,
             'variables': qparam_variables,
             'extensions': qparam_extensions
             }
-        response = requests.get(self.base_url, params=qparams)
+        response = requests.get(self.base_url, params=qparams, headers=self.random_header(), proxies={"http": next(self.__proxies_pool)})
         if response.status_code not in self.PASS_STATUS:
             raise Exception('Call Sanook api failed.')
         try:
@@ -63,14 +65,14 @@ class SanookScraper(Scraper):
         traced_urls = []
         for edge in edges:
             node = edge['node']
-            latest_news_id = node['id']
-            if checkpoint != '' and node['id'] == checkpoint:
+            if len(checkpoint) > 0 and node['id'] in checkpoint:
                 break
             else:
                 url = f"{self.__NEWS_SITE}{node['id']}"
+                latest_news_ids.append(node['id'])
                 traced_urls.append(url)
         self.urls = traced_urls
-        return traced_urls, latest_news_id
+        return traced_urls, set(latest_news_ids)
     
     def _filter(self, data:dict) -> dict:
         """Filter a raw scraped data and give the clean one after processed
@@ -157,7 +159,7 @@ class SanookScraper(Scraper):
                 'variables': qparam_variables,
                 'extensions': qparam_extensions
                 }
-            response = requests.get(self.base_url, params=qparams)
+            response = requests.get(self.base_url, params=qparams, headers=self.random_header(), proxies={"http": next(self.__proxies_pool)})
             if response.status_code not in self.PASS_STATUS:
                 continue
             else:
