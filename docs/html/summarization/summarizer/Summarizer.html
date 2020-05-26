@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>summarization.summarizer.Summarizer API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>summarization.summarizer.Summarizer</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+from corpus import thai_words
+from abc import ABC, abstractmethod
+from typing import List, Tuple, Union, NewType
+from summarization.utils import sentence_segment as sent_seg
+from summarization.utils import word_tokenize as tokenize
+from summarization.utils import stopwords, get_stem
+
+SentenceVector = NewType(&#39;SentenceVector&#39;, type(np.array([])))
+TFVector = NewType(&#39;TFVector&#39;, type(np.array([])))
+IDFVector = NewType(&#39;IDFVector&#39;, type(np.array([])))
+WeightedWordVector = NewType(&#39;WeightedWordVector&#39;, type(np.array([])))
+
+LANGUAGE_SUPPORT = [
+    &#39;th&#39;
+]
+
+class Summarizer(ABC):
+    &#39;&#39;&#39; Abstract class for summarizer engine &#39;&#39;&#39;
+    def __init__(self, compression_rate:float = 0.65, lang:str = &#39;th&#39;):
+        &#34;&#34;&#34;Contructor of Summarizer class
+        
+        Parameters
+        ----------
+        compression_rate : float, optional
+            compression rate that used to calculate number of extractive sentences, the value must be in range [0, 1], by default 0.65
+        lang : str, optional
+            language of document that need to be summarize, by default &#39;th&#39;
+        
+        Raises
+        ------
+        Exception
+            unsupport language
+        &#34;&#34;&#34;        
+        if not lang in LANGUAGE_SUPPORT:
+            raise Exception(&#34;Language not support&#34;)
+        compression_rate = compression_rate if compression_rate &lt;= 1 and compression_rate &gt;= 0 else 0.65
+        self.__ratio = 1 - compression_rate # raio of output sentences
+        self.__document = &#39;&#39;
+        self._sentences = []
+        self.__lang = lang
+        self.__total_sentences = 0
+        self.__all_words = []
+    
+    def n_extract_sents(self, n_sents:int) -&gt; int:
+        &#34;&#34;&#34;Get number of extractive sentences
+        
+        Parameters
+        ----------
+        n_sents : int
+            total number of sentences
+        
+        Returns
+        -------
+        int
+            number of extractive sentences
+        &#34;&#34;&#34;        
+        return int(np.ceil(self.__ratio*n_sents))
+
+    @property
+    def compression_rate(self) -&gt; float:
+        &#34;&#34;&#34;Get current compression rate
+        
+        Returns
+        -------
+        float
+            compression rate
+        &#34;&#34;&#34;        
+        return 1 - self.__ratio
+    
+    @compression_rate.setter
+    def compression_rate(self, rate:float) -&gt; None:
+        &#34;&#34;&#34;Set compression rate
+        
+        Parameters
+        ----------
+        rate : float
+            compression rate, the value must be in range [0, 1]
+        &#34;&#34;&#34;        
+        rate = rate if rate &lt;= 1 and rate &gt;= 0 else 0.65
+        self.__ratio = 1 - rate
+
+    def word_tokenize(self, document:str) -&gt; List[str]:
+        &#34;&#34;&#34;Demarcate a given document into its component words
+        
+        Parameters
+        ----------
+        document : str
+            document that need to be tokenize
+        
+        Returns
+        -------
+        List[str]
+            a list of component words
+        &#34;&#34;&#34;        
+        return tokenize(document)
+
+    def stem(self, word:str) -&gt; str:
+        &#34;&#34;&#34;Get a word stem of given word
+        
+        Parameters
+        ----------
+        word : str
+            word that need to find its stem
+        
+        Returns
+        -------
+        str
+            word stem or word
+        &#34;&#34;&#34;        
+        return get_stem(word, self.__lang)
+
+    def remove_stopwords(self, words:List[str], allow_unknown:bool = True) -&gt; List[str]:
+        &#34;&#34;&#34;Remove words which have very little meaning or similar words from given list
+        
+        Parameters
+        ----------
+        words : List[str]
+            a list of word
+        allow_unknown : bool, optional
+            a flag that determine whether or not to remove unknown word, by default False
+        
+        Returns
+        -------
+        List[str]
+            a list of removed stopwords
+        &#34;&#34;&#34;        
+        stopwords_set = stopwords(self.__lang)
+        if allow_unknown:
+            new_words = list(filter(lambda word: not word in stopwords_set, words))
+        else:
+            new_words = list(filter(lambda word: not word in stopwords_set, words))
+            new_words = list(filter(lambda word: word in thai_words(), new_words))
+        return new_words
+
+    def sentence_segment(self, document:str, remove_newline:bool = True, with_tag:bool = False) -&gt; Union[List[dict], List[str]]:
+        &#34;&#34;&#34;Split a document into sentences
+        
+        Parameters
+        ----------
+        document : str
+            document that need to be split
+        remove_newline : bool, optional
+            a flag that determine whether or not to replace &#39;\\n&#39; to &#39; &#39;, by default True
+        with_tag : bool, optional
+            a flag that determine whether or not to return a word tag as a result, by default False
+        
+        Returns
+        -------
+        Union[List[dict], List[str]]
+            list of sentences or list of dictionary that contains segmented document and a list of word with its tag
+        &#34;&#34;&#34;        
+        self._sentences = sent_seg(document, remove_newline, with_tag)
+        return self._sentences.copy()
+    
+    def merge_sentences(self, sentences:List[str] = []) -&gt; str:
+        &#34;&#34;&#34;Combine given list of sentences into a string
+        
+        Parameters
+        ----------
+        sentences : List[str], optional
+            a list of sentences, by default []
+        
+        Returns
+        -------
+        str
+            a string that combine every sentences and seprarate it with newline
+        
+        Raises
+        ------
+        ValueError
+            can&#39;t find any sentences to merge
+        &#34;&#34;&#34;        
+        if len(sentences) == 0 and len(self._sentences) == 0:
+            raise ValueError(&#39;Sentences not found&#39;)
+        merged = &#39;&#39;
+        sentences = sentences if len(sentences) != 0 else self._sentences
+        if type(sentences[0]) != str:
+            for sent in sentences:
+                merged += sent.content+&#39;\n&#39;
+        else:
+            for sent in sentences:
+                merged += sent+&#39;\n&#39;
+        return merged
+    
+    def __n_term_normalize(self, word_freq:int, normalize_factor:int) -&gt; float:
+        &#34;&#34;&#34;Get normalize value of word
+        
+        Parameters
+        ----------
+        word_freq : int
+            number of occurrences of a word
+        normalize_factor : int
+            a normalize factor
+        
+        Returns
+        -------
+        float
+            normalized value
+        &#34;&#34;&#34;        
+        return word_freq/normalize_factor
+
+    def __double_normalize(self, word_freq:int, normalize_factor:int, k:float) -&gt; float:
+        &#34;&#34;&#34;Get a value of double normalization k of word
+        
+        Parameters
+        ----------
+        word_freq : int
+            number of occurrences of a word
+        normalize_factor : int
+            a normalize factor
+        k : float
+            constant k
+        
+        Returns
+        -------
+        float
+            nomalized value
+        &#34;&#34;&#34;        
+        return k + ((1-k) * word_freq/normalize_factor)
+    
+    def __log_normalize(self, word_freq:int, c:int = 1) -&gt; float:
+        &#34;&#34;&#34;Get a value of log normalization
+        
+        Parameters
+        ----------
+        word_freq : int
+            number of occurrences of a word
+        c : int, optional
+            constant c, by default 1
+        
+        Returns
+        -------
+        float
+            normalized value
+        &#34;&#34;&#34;        
+        return np.log(c+word_freq)
+
+    def words_frequency(self, sentences:List[str] = None, normalize:str = &#39;&#39;, k:float = 0.5, allow_unknown:bool = True) -&gt; List[dict]:
+        &#34;&#34;&#34;Calculate a words frequency from a list of sentences
+        
+        Parameters
+        ----------
+        sentences : List[str], optional
+            a list of sentences that represent a document, by default None
+        normalize : str, optional
+            normalize method consists of &#39;n_term&#39;, &#39;double_k&#39;, &#39;log&#39;, by default &#39;&#39; mean raw count
+        k : float, optional
+            a constant that use in double normalization K, by default 0.5
+        allow_unknown : bool, optional
+            a flag that determine whether or not to keep unknown word in a list of word frequency, by default True
+        
+        Returns
+        -------
+        List[dict]
+            a list of dictionary that each element represented a pair of word and its frequency
+            e.g. result
+            [
+                {
+                    &#39;ตัวอย่าง&#39; : 1.0,
+                    &#39;รีเทิร์น&#39; : 0.5,
+                    &#39;ลิสต์&#39; : 1.0
+                },
+                {
+                    &#39;คำ&#39; : 1.0,
+                    &#39;รีเทิร์น&#39; : 0.5
+                }
+            ]
+        
+        Raises
+        ------
+        ValueError
+            can&#39;t find any sentences
+        &#34;&#34;&#34;        
+        available_normalize_method = [
+            &#39;n_term&#39;,
+            &#39;double_k&#39;,
+            &#39;log&#39;
+        ]
+        sentences = sentences if bool(sentences) else self._sentences
+        k = k if k &lt;= 1 and k &gt;= 0 else 0.5
+        if not bool(sentences):
+            raise ValueError(&#39;Sentences not found&#39;)
+        words_freq = []
+        for sent in sentences:
+            words = self.word_tokenize(sent)
+            words = self.remove_stopwords(words, allow_unknown)
+            words = list(map(lambda word: self.stem(word), words)) # word steming
+            word_set = set(words)
+            normalize_factor = 0
+            sent_word_count = {}
+            for word in word_set:
+                count = words.count(word)
+                sent_word_count[word] = count
+                if normalize == &#39;&#39; or not normalize in available_normalize_method:
+                    normalize_factor += count # use this factor in order to calculate normal tf
+                else:
+                    normalize_factor = max(normalize_factor, count) # use this factor in double normalize
+            if normalize == &#39;double_k&#39;:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], self.__double_normalize(item[1], normalize_factor, k)), 
+                    sent_word_count.items())) # Double Normalization K
+            elif normalize == &#39;log&#39;:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], self.__log_normalize(item[1])), 
+                    sent_word_count.items())) # Log normalization
+            elif normalize == &#39;n_term&#39;:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], self.__n_term_normalize(item[1], normalize_factor)), 
+                    sent_word_count.items())) # Term frequency
+            else:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], item[1]), 
+                    sent_word_count.items())) # Raw count
+            words_freq.append(sent_word_count)
+        if sentences == self._sentences:
+            self.__all_words = &#39;,&#39;.join(list(map(
+                lambda x: &#39;,&#39;.join(list(x.keys())), 
+                words_freq))).split(&#39;,&#39;)
+            self.__total_sentences = len(words_freq)
+        return words_freq
+
+    def _sentence_to_tf_vector(self, sentence:dict) -&gt; TFVector:
+        &#34;&#34;&#34;Transform given sentence to TermFrequency vector
+        
+        Parameters
+        ----------
+        sentence : dict
+            a single element in list that was generated from words_freqeuncy method that represent a single sentence
+        
+        Returns
+        -------
+        TFVector
+            vector of TermFrequency
+        &#34;&#34;&#34;        
+        return np.array(list(sentence.values()))
+    
+    def _sentence_to_idf_vector(self, sentence:dict) -&gt; IDFVector:
+        &#34;&#34;&#34;Transform given sentence to InverseDocumentFrequency vector
+        
+        Parameters
+        ----------
+        sentence : dict
+            a single element in list that was generated from words_frequency method that represent a single sentence
+        
+        Returns
+        -------
+        IDFVector
+            vector of InverseDocumentFrequency
+        
+        Raises
+        ------
+        ValueError
+            can&#39;t find any sentence
+        &#34;&#34;&#34;        
+        if self.__total_sentences == 0 or len(self.__all_words) == 0:
+            raise ValueError(&#34;Sentences required&#34;)
+        words = list(sentence.keys())
+        n_sent_vector = np.array(list(map(lambda word: self.__all_words.count(word), words))) # vector of no. of sentence that contain word i
+        idf_smooth_vector = np.log(self.__total_sentences/(1+n_sent_vector))+1 #inverse document frequency smooth of sentence sent
+        return idf_smooth_vector
+    
+    def _weighted_word_vector(self, tf_vector:TFVector, idf_vector:IDFVector) -&gt; WeightedWordVector:
+        &#34;&#34;&#34;Assign weight to every words in given vector
+        
+        Parameters
+        ----------
+        tf_vector : TFVector
+            vector of TermFrequency
+        idf_vector : IDFVector
+            vector of InverseDocumentFrequency
+        
+        Returns
+        -------
+        WeightedWordVector
+            vector of weighted word
+        &#34;&#34;&#34;        
+        return tf_vector*idf_vector
+    
+    def _weighted_sentence(self, tf_vector:TFVector, idf_vector:IDFVector) -&gt; float:
+        &#34;&#34;&#34;Calculate a weight of sentence from a result of dot product between TermFrequency vector and InverseDocumentFrequency
+        
+        Parameters
+        ----------
+        tf_vector : TFVector
+            vector of TermFrequency
+        idf_vector : IDFVector
+            vector of InverseDocumentFrequency
+        
+        Returns
+        -------
+        float
+            sentence weight
+        &#34;&#34;&#34;        
+        return tf_vector.dot(idf_vector)
+
+    @abstractmethod
+    def _extract_importance_sentences(self, weighted_sentences:List[Tuple[int, float]], merge:bool = False) -&gt; Union[List[str], str]:
+        pass
+
+    @abstractmethod
+    def summarize(self, document:str, merge_sentences:bool = False) -&gt; Union[List[str], str]:
+        pass</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="summarization.summarizer.Summarizer.Summarizer"><code class="flex name class">
+<span>class <span class="ident">Summarizer</span></span>
+<span>(</span><span>compression_rate: float = 0.65, lang: str = 'th')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract class for summarizer engine </p>
+<p>Contructor of Summarizer class</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>compression_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>compression rate that used to calculate number of extractive sentences, the value must be in range [0, 1], by default 0.65</dd>
+<dt><strong><code>lang</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>language of document that need to be summarize, by default 'th'</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>Exception</code></dt>
+<dd>unsupport language</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Summarizer(ABC):
+    &#39;&#39;&#39; Abstract class for summarizer engine &#39;&#39;&#39;
+    def __init__(self, compression_rate:float = 0.65, lang:str = &#39;th&#39;):
+        &#34;&#34;&#34;Contructor of Summarizer class
+        
+        Parameters
+        ----------
+        compression_rate : float, optional
+            compression rate that used to calculate number of extractive sentences, the value must be in range [0, 1], by default 0.65
+        lang : str, optional
+            language of document that need to be summarize, by default &#39;th&#39;
+        
+        Raises
+        ------
+        Exception
+            unsupport language
+        &#34;&#34;&#34;        
+        if not lang in LANGUAGE_SUPPORT:
+            raise Exception(&#34;Language not support&#34;)
+        compression_rate = compression_rate if compression_rate &lt;= 1 and compression_rate &gt;= 0 else 0.65
+        self.__ratio = 1 - compression_rate # raio of output sentences
+        self.__document = &#39;&#39;
+        self._sentences = []
+        self.__lang = lang
+        self.__total_sentences = 0
+        self.__all_words = []
+    
+    def n_extract_sents(self, n_sents:int) -&gt; int:
+        &#34;&#34;&#34;Get number of extractive sentences
+        
+        Parameters
+        ----------
+        n_sents : int
+            total number of sentences
+        
+        Returns
+        -------
+        int
+            number of extractive sentences
+        &#34;&#34;&#34;        
+        return int(np.ceil(self.__ratio*n_sents))
+
+    @property
+    def compression_rate(self) -&gt; float:
+        &#34;&#34;&#34;Get current compression rate
+        
+        Returns
+        -------
+        float
+            compression rate
+        &#34;&#34;&#34;        
+        return 1 - self.__ratio
+    
+    @compression_rate.setter
+    def compression_rate(self, rate:float) -&gt; None:
+        &#34;&#34;&#34;Set compression rate
+        
+        Parameters
+        ----------
+        rate : float
+            compression rate, the value must be in range [0, 1]
+        &#34;&#34;&#34;        
+        rate = rate if rate &lt;= 1 and rate &gt;= 0 else 0.65
+        self.__ratio = 1 - rate
+
+    def word_tokenize(self, document:str) -&gt; List[str]:
+        &#34;&#34;&#34;Demarcate a given document into its component words
+        
+        Parameters
+        ----------
+        document : str
+            document that need to be tokenize
+        
+        Returns
+        -------
+        List[str]
+            a list of component words
+        &#34;&#34;&#34;        
+        return tokenize(document)
+
+    def stem(self, word:str) -&gt; str:
+        &#34;&#34;&#34;Get a word stem of given word
+        
+        Parameters
+        ----------
+        word : str
+            word that need to find its stem
+        
+        Returns
+        -------
+        str
+            word stem or word
+        &#34;&#34;&#34;        
+        return get_stem(word, self.__lang)
+
+    def remove_stopwords(self, words:List[str], allow_unknown:bool = True) -&gt; List[str]:
+        &#34;&#34;&#34;Remove words which have very little meaning or similar words from given list
+        
+        Parameters
+        ----------
+        words : List[str]
+            a list of word
+        allow_unknown : bool, optional
+            a flag that determine whether or not to remove unknown word, by default False
+        
+        Returns
+        -------
+        List[str]
+            a list of removed stopwords
+        &#34;&#34;&#34;        
+        stopwords_set = stopwords(self.__lang)
+        if allow_unknown:
+            new_words = list(filter(lambda word: not word in stopwords_set, words))
+        else:
+            new_words = list(filter(lambda word: not word in stopwords_set, words))
+            new_words = list(filter(lambda word: word in thai_words(), new_words))
+        return new_words
+
+    def sentence_segment(self, document:str, remove_newline:bool = True, with_tag:bool = False) -&gt; Union[List[dict], List[str]]:
+        &#34;&#34;&#34;Split a document into sentences
+        
+        Parameters
+        ----------
+        document : str
+            document that need to be split
+        remove_newline : bool, optional
+            a flag that determine whether or not to replace &#39;\\n&#39; to &#39; &#39;, by default True
+        with_tag : bool, optional
+            a flag that determine whether or not to return a word tag as a result, by default False
+        
+        Returns
+        -------
+        Union[List[dict], List[str]]
+            list of sentences or list of dictionary that contains segmented document and a list of word with its tag
+        &#34;&#34;&#34;        
+        self._sentences = sent_seg(document, remove_newline, with_tag)
+        return self._sentences.copy()
+    
+    def merge_sentences(self, sentences:List[str] = []) -&gt; str:
+        &#34;&#34;&#34;Combine given list of sentences into a string
+        
+        Parameters
+        ----------
+        sentences : List[str], optional
+            a list of sentences, by default []
+        
+        Returns
+        -------
+        str
+            a string that combine every sentences and seprarate it with newline
+        
+        Raises
+        ------
+        ValueError
+            can&#39;t find any sentences to merge
+        &#34;&#34;&#34;        
+        if len(sentences) == 0 and len(self._sentences) == 0:
+            raise ValueError(&#39;Sentences not found&#39;)
+        merged = &#39;&#39;
+        sentences = sentences if len(sentences) != 0 else self._sentences
+        if type(sentences[0]) != str:
+            for sent in sentences:
+                merged += sent.content+&#39;\n&#39;
+        else:
+            for sent in sentences:
+                merged += sent+&#39;\n&#39;
+        return merged
+    
+    def __n_term_normalize(self, word_freq:int, normalize_factor:int) -&gt; float:
+        &#34;&#34;&#34;Get normalize value of word
+        
+        Parameters
+        ----------
+        word_freq : int
+            number of occurrences of a word
+        normalize_factor : int
+            a normalize factor
+        
+        Returns
+        -------
+        float
+            normalized value
+        &#34;&#34;&#34;        
+        return word_freq/normalize_factor
+
+    def __double_normalize(self, word_freq:int, normalize_factor:int, k:float) -&gt; float:
+        &#34;&#34;&#34;Get a value of double normalization k of word
+        
+        Parameters
+        ----------
+        word_freq : int
+            number of occurrences of a word
+        normalize_factor : int
+            a normalize factor
+        k : float
+            constant k
+        
+        Returns
+        -------
+        float
+            nomalized value
+        &#34;&#34;&#34;        
+        return k + ((1-k) * word_freq/normalize_factor)
+    
+    def __log_normalize(self, word_freq:int, c:int = 1) -&gt; float:
+        &#34;&#34;&#34;Get a value of log normalization
+        
+        Parameters
+        ----------
+        word_freq : int
+            number of occurrences of a word
+        c : int, optional
+            constant c, by default 1
+        
+        Returns
+        -------
+        float
+            normalized value
+        &#34;&#34;&#34;        
+        return np.log(c+word_freq)
+
+    def words_frequency(self, sentences:List[str] = None, normalize:str = &#39;&#39;, k:float = 0.5, allow_unknown:bool = True) -&gt; List[dict]:
+        &#34;&#34;&#34;Calculate a words frequency from a list of sentences
+        
+        Parameters
+        ----------
+        sentences : List[str], optional
+            a list of sentences that represent a document, by default None
+        normalize : str, optional
+            normalize method consists of &#39;n_term&#39;, &#39;double_k&#39;, &#39;log&#39;, by default &#39;&#39; mean raw count
+        k : float, optional
+            a constant that use in double normalization K, by default 0.5
+        allow_unknown : bool, optional
+            a flag that determine whether or not to keep unknown word in a list of word frequency, by default True
+        
+        Returns
+        -------
+        List[dict]
+            a list of dictionary that each element represented a pair of word and its frequency
+            e.g. result
+            [
+                {
+                    &#39;ตัวอย่าง&#39; : 1.0,
+                    &#39;รีเทิร์น&#39; : 0.5,
+                    &#39;ลิสต์&#39; : 1.0
+                },
+                {
+                    &#39;คำ&#39; : 1.0,
+                    &#39;รีเทิร์น&#39; : 0.5
+                }
+            ]
+        
+        Raises
+        ------
+        ValueError
+            can&#39;t find any sentences
+        &#34;&#34;&#34;        
+        available_normalize_method = [
+            &#39;n_term&#39;,
+            &#39;double_k&#39;,
+            &#39;log&#39;
+        ]
+        sentences = sentences if bool(sentences) else self._sentences
+        k = k if k &lt;= 1 and k &gt;= 0 else 0.5
+        if not bool(sentences):
+            raise ValueError(&#39;Sentences not found&#39;)
+        words_freq = []
+        for sent in sentences:
+            words = self.word_tokenize(sent)
+            words = self.remove_stopwords(words, allow_unknown)
+            words = list(map(lambda word: self.stem(word), words)) # word steming
+            word_set = set(words)
+            normalize_factor = 0
+            sent_word_count = {}
+            for word in word_set:
+                count = words.count(word)
+                sent_word_count[word] = count
+                if normalize == &#39;&#39; or not normalize in available_normalize_method:
+                    normalize_factor += count # use this factor in order to calculate normal tf
+                else:
+                    normalize_factor = max(normalize_factor, count) # use this factor in double normalize
+            if normalize == &#39;double_k&#39;:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], self.__double_normalize(item[1], normalize_factor, k)), 
+                    sent_word_count.items())) # Double Normalization K
+            elif normalize == &#39;log&#39;:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], self.__log_normalize(item[1])), 
+                    sent_word_count.items())) # Log normalization
+            elif normalize == &#39;n_term&#39;:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], self.__n_term_normalize(item[1], normalize_factor)), 
+                    sent_word_count.items())) # Term frequency
+            else:
+                sent_word_count = dict(map(
+                    lambda item: (item[0], item[1]), 
+                    sent_word_count.items())) # Raw count
+            words_freq.append(sent_word_count)
+        if sentences == self._sentences:
+            self.__all_words = &#39;,&#39;.join(list(map(
+                lambda x: &#39;,&#39;.join(list(x.keys())), 
+                words_freq))).split(&#39;,&#39;)
+            self.__total_sentences = len(words_freq)
+        return words_freq
+
+    def _sentence_to_tf_vector(self, sentence:dict) -&gt; TFVector:
+        &#34;&#34;&#34;Transform given sentence to TermFrequency vector
+        
+        Parameters
+        ----------
+        sentence : dict
+            a single element in list that was generated from words_freqeuncy method that represent a single sentence
+        
+        Returns
+        -------
+        TFVector
+            vector of TermFrequency
+        &#34;&#34;&#34;        
+        return np.array(list(sentence.values()))
+    
+    def _sentence_to_idf_vector(self, sentence:dict) -&gt; IDFVector:
+        &#34;&#34;&#34;Transform given sentence to InverseDocumentFrequency vector
+        
+        Parameters
+        ----------
+        sentence : dict
+            a single element in list that was generated from words_frequency method that represent a single sentence
+        
+        Returns
+        -------
+        IDFVector
+            vector of InverseDocumentFrequency
+        
+        Raises
+        ------
+        ValueError
+            can&#39;t find any sentence
+        &#34;&#34;&#34;        
+        if self.__total_sentences == 0 or len(self.__all_words) == 0:
+            raise ValueError(&#34;Sentences required&#34;)
+        words = list(sentence.keys())
+        n_sent_vector = np.array(list(map(lambda word: self.__all_words.count(word), words))) # vector of no. of sentence that contain word i
+        idf_smooth_vector = np.log(self.__total_sentences/(1+n_sent_vector))+1 #inverse document frequency smooth of sentence sent
+        return idf_smooth_vector
+    
+    def _weighted_word_vector(self, tf_vector:TFVector, idf_vector:IDFVector) -&gt; WeightedWordVector:
+        &#34;&#34;&#34;Assign weight to every words in given vector
+        
+        Parameters
+        ----------
+        tf_vector : TFVector
+            vector of TermFrequency
+        idf_vector : IDFVector
+            vector of InverseDocumentFrequency
+        
+        Returns
+        -------
+        WeightedWordVector
+            vector of weighted word
+        &#34;&#34;&#34;        
+        return tf_vector*idf_vector
+    
+    def _weighted_sentence(self, tf_vector:TFVector, idf_vector:IDFVector) -&gt; float:
+        &#34;&#34;&#34;Calculate a weight of sentence from a result of dot product between TermFrequency vector and InverseDocumentFrequency
+        
+        Parameters
+        ----------
+        tf_vector : TFVector
+            vector of TermFrequency
+        idf_vector : IDFVector
+            vector of InverseDocumentFrequency
+        
+        Returns
+        -------
+        float
+            sentence weight
+        &#34;&#34;&#34;        
+        return tf_vector.dot(idf_vector)
+
+    @abstractmethod
+    def _extract_importance_sentences(self, weighted_sentences:List[Tuple[int, float]], merge:bool = False) -&gt; Union[List[str], str]:
+        pass
+
+    @abstractmethod
+    def summarize(self, document:str, merge_sentences:bool = False) -&gt; Union[List[str], str]:
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="summarization.summarizer.SentenceRank.SentenceRank" href="SentenceRank.html#summarization.summarizer.SentenceRank.SentenceRank">SentenceRank</a></li>
+<li><a title="summarization.summarizer.TextRank.TextRank" href="TextRank.html#summarization.summarizer.TextRank.TextRank">TextRank</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="summarization.summarizer.Summarizer.Summarizer.compression_rate"><code class="name">var <span class="ident">compression_rate</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Get current compression rate</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>compression rate</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def compression_rate(self) -&gt; float:
+    &#34;&#34;&#34;Get current compression rate
+    
+    Returns
+    -------
+    float
+        compression rate
+    &#34;&#34;&#34;        
+    return 1 - self.__ratio</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="summarization.summarizer.Summarizer.Summarizer.merge_sentences"><code class="name flex">
+<span>def <span class="ident">merge_sentences</span></span>(<span>self, sentences: List[str] = []) -> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Combine given list of sentences into a string</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>sentences</code></strong> :&ensp;<code>List[str]</code>, optional</dt>
+<dd>a list of sentences, by default []</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>a string that combine every sentences and seprarate it with newline</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>can't find any sentences to merge</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_sentences(self, sentences:List[str] = []) -&gt; str:
+    &#34;&#34;&#34;Combine given list of sentences into a string
+    
+    Parameters
+    ----------
+    sentences : List[str], optional
+        a list of sentences, by default []
+    
+    Returns
+    -------
+    str
+        a string that combine every sentences and seprarate it with newline
+    
+    Raises
+    ------
+    ValueError
+        can&#39;t find any sentences to merge
+    &#34;&#34;&#34;        
+    if len(sentences) == 0 and len(self._sentences) == 0:
+        raise ValueError(&#39;Sentences not found&#39;)
+    merged = &#39;&#39;
+    sentences = sentences if len(sentences) != 0 else self._sentences
+    if type(sentences[0]) != str:
+        for sent in sentences:
+            merged += sent.content+&#39;\n&#39;
+    else:
+        for sent in sentences:
+            merged += sent+&#39;\n&#39;
+    return merged</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.n_extract_sents"><code class="name flex">
+<span>def <span class="ident">n_extract_sents</span></span>(<span>self, n_sents: int) -> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get number of extractive sentences</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>n_sents</code></strong> :&ensp;<code>int</code></dt>
+<dd>total number of sentences</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>number of extractive sentences</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def n_extract_sents(self, n_sents:int) -&gt; int:
+    &#34;&#34;&#34;Get number of extractive sentences
+    
+    Parameters
+    ----------
+    n_sents : int
+        total number of sentences
+    
+    Returns
+    -------
+    int
+        number of extractive sentences
+    &#34;&#34;&#34;        
+    return int(np.ceil(self.__ratio*n_sents))</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.remove_stopwords"><code class="name flex">
+<span>def <span class="ident">remove_stopwords</span></span>(<span>self, words: List[str], allow_unknown: bool = True) -> List[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove words which have very little meaning or similar words from given list</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>words</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>a list of word</dd>
+<dt><strong><code>allow_unknown</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>a flag that determine whether or not to remove unknown word, by default False</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[str]</code></dt>
+<dd>a list of removed stopwords</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_stopwords(self, words:List[str], allow_unknown:bool = True) -&gt; List[str]:
+    &#34;&#34;&#34;Remove words which have very little meaning or similar words from given list
+    
+    Parameters
+    ----------
+    words : List[str]
+        a list of word
+    allow_unknown : bool, optional
+        a flag that determine whether or not to remove unknown word, by default False
+    
+    Returns
+    -------
+    List[str]
+        a list of removed stopwords
+    &#34;&#34;&#34;        
+    stopwords_set = stopwords(self.__lang)
+    if allow_unknown:
+        new_words = list(filter(lambda word: not word in stopwords_set, words))
+    else:
+        new_words = list(filter(lambda word: not word in stopwords_set, words))
+        new_words = list(filter(lambda word: word in thai_words(), new_words))
+    return new_words</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.sentence_segment"><code class="name flex">
+<span>def <span class="ident">sentence_segment</span></span>(<span>self, document: str, remove_newline: bool = True, with_tag: bool = False) -> Union[List[dict], List[str]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Split a document into sentences</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>document</code></strong> :&ensp;<code>str</code></dt>
+<dd>document that need to be split</dd>
+<dt><strong><code>remove_newline</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>a flag that determine whether or not to replace '\n' to ' ', by default True</dd>
+<dt><strong><code>with_tag</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>a flag that determine whether or not to return a word tag as a result, by default False</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Union[List[dict], List[str]]</code></dt>
+<dd>list of sentences or list of dictionary that contains segmented document and a list of word with its tag</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sentence_segment(self, document:str, remove_newline:bool = True, with_tag:bool = False) -&gt; Union[List[dict], List[str]]:
+    &#34;&#34;&#34;Split a document into sentences
+    
+    Parameters
+    ----------
+    document : str
+        document that need to be split
+    remove_newline : bool, optional
+        a flag that determine whether or not to replace &#39;\\n&#39; to &#39; &#39;, by default True
+    with_tag : bool, optional
+        a flag that determine whether or not to return a word tag as a result, by default False
+    
+    Returns
+    -------
+    Union[List[dict], List[str]]
+        list of sentences or list of dictionary that contains segmented document and a list of word with its tag
+    &#34;&#34;&#34;        
+    self._sentences = sent_seg(document, remove_newline, with_tag)
+    return self._sentences.copy()</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.stem"><code class="name flex">
+<span>def <span class="ident">stem</span></span>(<span>self, word: str) -> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a word stem of given word</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>word</code></strong> :&ensp;<code>str</code></dt>
+<dd>word that need to find its stem</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>word stem or word</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def stem(self, word:str) -&gt; str:
+    &#34;&#34;&#34;Get a word stem of given word
+    
+    Parameters
+    ----------
+    word : str
+        word that need to find its stem
+    
+    Returns
+    -------
+    str
+        word stem or word
+    &#34;&#34;&#34;        
+    return get_stem(word, self.__lang)</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.summarize"><code class="name flex">
+<span>def <span class="ident">summarize</span></span>(<span>self, document: str, merge_sentences: bool = False) -> Union[List[str], str]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def summarize(self, document:str, merge_sentences:bool = False) -&gt; Union[List[str], str]:
+    pass</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.word_tokenize"><code class="name flex">
+<span>def <span class="ident">word_tokenize</span></span>(<span>self, document: str) -> List[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Demarcate a given document into its component words</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>document</code></strong> :&ensp;<code>str</code></dt>
+<dd>document that need to be tokenize</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[str]</code></dt>
+<dd>a list of component words</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def word_tokenize(self, document:str) -&gt; List[str]:
+    &#34;&#34;&#34;Demarcate a given document into its component words
+    
+    Parameters
+    ----------
+    document : str
+        document that need to be tokenize
+    
+    Returns
+    -------
+    List[str]
+        a list of component words
+    &#34;&#34;&#34;        
+    return tokenize(document)</code></pre>
+</details>
+</dd>
+<dt id="summarization.summarizer.Summarizer.Summarizer.words_frequency"><code class="name flex">
+<span>def <span class="ident">words_frequency</span></span>(<span>self, sentences: List[str] = None, normalize: str = '', k: float = 0.5, allow_unknown: bool = True) -> List[dict]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate a words frequency from a list of sentences</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>sentences</code></strong> :&ensp;<code>List[str]</code>, optional</dt>
+<dd>a list of sentences that represent a document, by default None</dd>
+<dt><strong><code>normalize</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>normalize method consists of 'n_term', 'double_k', 'log', by default '' mean raw count</dd>
+<dt><strong><code>k</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>a constant that use in double normalization K, by default 0.5</dd>
+<dt><strong><code>allow_unknown</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>a flag that determine whether or not to keep unknown word in a list of word frequency, by default True</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[dict]</code></dt>
+<dd>a list of dictionary that each element represented a pair of word and its frequency
+e.g. result
+[
+{
+'ตัวอย่าง' : 1.0,
+'รีเทิร์น' : 0.5,
+'ลิสต์' : 1.0
+},
+{
+'คำ' : 1.0,
+'รีเทิร์น' : 0.5
+}
+]</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>can't find any sentences</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def words_frequency(self, sentences:List[str] = None, normalize:str = &#39;&#39;, k:float = 0.5, allow_unknown:bool = True) -&gt; List[dict]:
+    &#34;&#34;&#34;Calculate a words frequency from a list of sentences
+    
+    Parameters
+    ----------
+    sentences : List[str], optional
+        a list of sentences that represent a document, by default None
+    normalize : str, optional
+        normalize method consists of &#39;n_term&#39;, &#39;double_k&#39;, &#39;log&#39;, by default &#39;&#39; mean raw count
+    k : float, optional
+        a constant that use in double normalization K, by default 0.5
+    allow_unknown : bool, optional
+        a flag that determine whether or not to keep unknown word in a list of word frequency, by default True
+    
+    Returns
+    -------
+    List[dict]
+        a list of dictionary that each element represented a pair of word and its frequency
+        e.g. result
+        [
+            {
+                &#39;ตัวอย่าง&#39; : 1.0,
+                &#39;รีเทิร์น&#39; : 0.5,
+                &#39;ลิสต์&#39; : 1.0
+            },
+            {
+                &#39;คำ&#39; : 1.0,
+                &#39;รีเทิร์น&#39; : 0.5
+            }
+        ]
+    
+    Raises
+    ------
+    ValueError
+        can&#39;t find any sentences
+    &#34;&#34;&#34;        
+    available_normalize_method = [
+        &#39;n_term&#39;,
+        &#39;double_k&#39;,
+        &#39;log&#39;
+    ]
+    sentences = sentences if bool(sentences) else self._sentences
+    k = k if k &lt;= 1 and k &gt;= 0 else 0.5
+    if not bool(sentences):
+        raise ValueError(&#39;Sentences not found&#39;)
+    words_freq = []
+    for sent in sentences:
+        words = self.word_tokenize(sent)
+        words = self.remove_stopwords(words, allow_unknown)
+        words = list(map(lambda word: self.stem(word), words)) # word steming
+        word_set = set(words)
+        normalize_factor = 0
+        sent_word_count = {}
+        for word in word_set:
+            count = words.count(word)
+            sent_word_count[word] = count
+            if normalize == &#39;&#39; or not normalize in available_normalize_method:
+                normalize_factor += count # use this factor in order to calculate normal tf
+            else:
+                normalize_factor = max(normalize_factor, count) # use this factor in double normalize
+        if normalize == &#39;double_k&#39;:
+            sent_word_count = dict(map(
+                lambda item: (item[0], self.__double_normalize(item[1], normalize_factor, k)), 
+                sent_word_count.items())) # Double Normalization K
+        elif normalize == &#39;log&#39;:
+            sent_word_count = dict(map(
+                lambda item: (item[0], self.__log_normalize(item[1])), 
+                sent_word_count.items())) # Log normalization
+        elif normalize == &#39;n_term&#39;:
+            sent_word_count = dict(map(
+                lambda item: (item[0], self.__n_term_normalize(item[1], normalize_factor)), 
+                sent_word_count.items())) # Term frequency
+        else:
+            sent_word_count = dict(map(
+                lambda item: (item[0], item[1]), 
+                sent_word_count.items())) # Raw count
+        words_freq.append(sent_word_count)
+    if sentences == self._sentences:
+        self.__all_words = &#39;,&#39;.join(list(map(
+            lambda x: &#39;,&#39;.join(list(x.keys())), 
+            words_freq))).split(&#39;,&#39;)
+        self.__total_sentences = len(words_freq)
+    return words_freq</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="summarization.summarizer" href="index.html">summarization.summarizer</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="summarization.summarizer.Summarizer.Summarizer" href="#summarization.summarizer.Summarizer.Summarizer">Summarizer</a></code></h4>
+<ul class="two-column">
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.compression_rate" href="#summarization.summarizer.Summarizer.Summarizer.compression_rate">compression_rate</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.merge_sentences" href="#summarization.summarizer.Summarizer.Summarizer.merge_sentences">merge_sentences</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.n_extract_sents" href="#summarization.summarizer.Summarizer.Summarizer.n_extract_sents">n_extract_sents</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.remove_stopwords" href="#summarization.summarizer.Summarizer.Summarizer.remove_stopwords">remove_stopwords</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.sentence_segment" href="#summarization.summarizer.Summarizer.Summarizer.sentence_segment">sentence_segment</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.stem" href="#summarization.summarizer.Summarizer.Summarizer.stem">stem</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.summarize" href="#summarization.summarizer.Summarizer.Summarizer.summarize">summarize</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.word_tokenize" href="#summarization.summarizer.Summarizer.Summarizer.word_tokenize">word_tokenize</a></code></li>
+<li><code><a title="summarization.summarizer.Summarizer.Summarizer.words_frequency" href="#summarization.summarizer.Summarizer.Summarizer.words_frequency">words_frequency</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

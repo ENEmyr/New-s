@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>news.News API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>news.News</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import threading
+import asyncio
+import time
+from typing import List, Tuple, Union, Dict
+from apiConnector.ApiConnector import ApiConnector
+from newsScraper.NewsScraper import NewsScraper
+from summarization.Summarization import summarize
+
+class News:
+    &#39;&#39;&#39; Main package that used to run automatic news summarization from online news source &#39;&#39;&#39;
+    def __init__(
+        self, 
+        delay:float = 3600, 
+        trace_limit:int = 12, 
+        summarize_algorithm:str = &#39;text_rank&#39;,
+        compression_rate:float = .6,
+        checkpoints:dict = {}
+        ) -&gt; None:
+        &#34;&#34;&#34;A News class contructor
+
+        Parameters
+        ----------
+        delay : float, optional
+            Delay time in seconds before repete an automatic news scraping system, by default 3600
+        trace_limit : int, optional
+            A number of News to be scrape in each repeat cycle, by default 12
+        summarize_algorithm : str, optional
+            A summarize algorithm name that can select betweet &#39;text_rank&#39; and &#39;sentence_rank&#39;, by default &#39;text_rank&#39;
+        compression_rate : float, optional
+            Original News compression rate, by default .6
+        checkpoints : dict, optional
+            A dictionary contain publisher name as a key and list of news ids as a value, by default {}
+        &#34;&#34;&#34;        
+        self.__delay = delay
+        self.__trace_limit = trace_limit
+        self.__summarize_algorithm = summarize_algorithm
+        self.__compression_rate = compression_rate
+        self.__news_scraper = NewsScraper(max_trace_limit=trace_limit)
+        self.__checkpoints = checkpoints if bool(checkpoints) else {
+            &#39;sanook&#39; : []
+        }
+    
+    def __update_checkpoint(self, latest_news_ids:Dict[str, str]) -&gt; None:
+        &#34;&#34;&#34;Update current checkpoint, where checkpoint is the list of latest news ids
+
+        Parameters
+        ----------
+        latest_news_ids : Dict[str, str]
+            Latest News ids in previous trace batch
+        &#34;&#34;&#34;        
+        for publisher in latest_news_ids:
+            latest_news = []
+            if len(latest_news_ids[publisher]) == 0:
+                continue
+            else:
+                self.__checkpoints[publisher] = latest_news_ids[publisher]
+                    #if news_id not in self.__checkpoints:
+                    #    if len(self.__checkpoints[publisher]) &gt; 0:
+                    #        self.__checkpoints[publisher].pop()
+                    #    self.__checkpoints[publisher].insert(0, news_id)
+
+    def __auto_scrape(self, name=None, run_event=None) -&gt; None:
+        &#34;&#34;&#34;Automatic scrape news from online news source
+
+        Parameters
+        ----------
+        name : Thread, optional
+            thread name, by default None
+        run_event : Thread, optional
+            run thread event, by default None
+        &#34;&#34;&#34;        
+        print(&#39;Scraper worker is starting...&#39;)
+        api_connector = ApiConnector()
+        while run_event.is_set():
+            urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=[])
+            if latest_news_ids[&#39;sanook&#39;] != self.__checkpoints[&#39;sanook&#39;]:
+                for index in range(len(latest_news_ids[&#39;sanook&#39;])):
+                    if latest_news_ids[&#39;sanook&#39;][index] in self.__checkpoints[&#39;sanook&#39;]:
+                        continue
+                    scraped_news = self.__news_scraper.scrape(urls[index])
+                    api_connector.setModel(&#39;raw&#39;)
+                    for news in scraped_news:
+                        status_code, status_text = api_connector.post(news)
+                        if not status_code in api_connector.PASS_STATUS:
+                            print(&#34;Bad status code at post raw news :&#34;, status_code)
+                            continue
+                        else:
+                            print(&#34;Raw news pushed.&#34;)
+                self.__update_checkpoint(latest_news_ids)
+            print(&#39;Scraper is sleeping now...&#39;)
+            time.sleep(self.__delay)
+
+    def __auto_summarize(self, name=None, run_event=None) -&gt; None:
+        &#34;&#34;&#34;Automatic summarize scraped news that has been collected in New-sREST api
+
+        Parameters
+        ----------
+        name : Thread, optional
+            thread name, by default None
+        run_event : Thread, optional
+            run thread event, by default None
+
+        &#34;&#34;&#34;        
+        print(&#39;Summarize worker is starting...&#39;)
+        failed_mark_as_summarized = []
+        raw_connector = ApiConnector()
+        summarized_connector = ApiConnector()
+        raw_connector.setModel(&#39;raw&#39;)
+        summarized_connector.setModel(&#39;summarized&#39;)
+        while run_event.is_set():
+            try:
+                get_raw_params = {&#39;limit&#39;:24, &#39;summarizeStatus&#39;: &#39;false&#39;}
+                status_code, raw_news = raw_connector.get(get_raw_params)
+                if len(raw_news) != 0:
+                    for news in raw_news:
+                        if type(news[&#39;_id&#39;]) != str:
+                            if news[&#39;_id&#39;] in failed_mark_as_summarized:
+                                continue
+                        mark_as_summarized = news[&#39;_id&#39;]
+                        summarized_news = summarize(news[&#39;content&#39;], self.__compression_rate, lang=&#39;th&#39;, algorithm=self.__summarize_algorithm)
+                        if len(summarized_news) == 0: # return nothing from summarize system
+                            try_different_algo = &#39;sentence_rank&#39; if self.__summarize_algorithm == &#39;text_rank&#39; else &#39;text_rank&#39;
+                            summarized_news = summarize(news[&#39;content&#39;], self.__compression_rate, lang=&#39;th&#39;, algorithm=try_different_algo)
+                        news[&#39;content&#39;] = summarized_news if bool(summarized_news) else news[&#39;content&#39;]
+                        del(news[&#39;_id&#39;])
+                        del(news[&#39;__v&#39;])
+                        del(news[&#39;insertDt&#39;])
+                        del(news[&#39;summarizeStatus&#39;])
+                        status_code, status_text = summarized_connector.post(news)
+                        if not status_code in summarized_connector.PASS_STATUS:
+                            print(&#34;Bad status code at post summarized news :&#34;, status_code)
+                            continue
+                        else:
+                            print(&#34;Summarized news pushed&#34;)
+                        status_code, status_text = raw_connector.put(mark_as_summarized, {&#34;summarizeStatus&#34;: &#39;true&#39;})
+                        if not status_code in raw_connector.PASS_STATUS:
+                            print(&#34;Failed to re-assign summarizeStatus with bad code :&#34;, status_code)
+                            failed_mark_as_summarized.append(mark_as_summarized)
+                        else:
+                            print(&#34;Re-assign summarizeStatus completed on raw news id {}&#34;.format(mark_as_summarized))
+                if len(failed_mark_as_summarized) != 0:
+                    for i in range(0, len(failed_mark_as_summarized)):
+                        status_code, status_text = raw_connector.put(failed_mark_as_summarized[i], {&#34;summarizeStatus&#34;: True})
+                        if not status_code in raw_connector.PASS_STATUS:
+                            print(&#34;Failed to re-assign summarizeStatus with bad code :&#34;, status_code)
+                        else:
+                            print(&#34;Re-assign summarizeStatus completed on raw news id {}&#34;.format(mark_as_summarized))
+                            del(failed_mark_as_summarized[i])
+                #time.sleep(self.__delay/2)
+            except:
+                print(&#39;Some error occur in auto_summarize&#39;)
+
+    def start(self) -&gt; Dict[str, list]:
+        &#34;&#34;&#34;Start automatic news scraping and summarizing system
+
+        Returns
+        -------
+        Dict[str, list]
+            A dictionary that represented a checkpoint news of each publishers
+        &#34;&#34;&#34;        
+        run_event = threading.Event()
+        run_event.set()
+        scraper_worker = threading.Thread(target=self.__auto_scrape, args=(&#39;scraper&#39;, run_event))
+        summarier_worker = threading.Thread(target=self.__auto_summarize, args=(&#39;scraper&#39;, run_event))
+        scraper_worker.start()
+        summarier_worker.start()
+        print(&#34;System started.&#34;)
+        try:
+            while True:
+                #print(&#39;Delay...&#39;)
+                time.sleep(self.__delay)
+        except KeyboardInterrupt:
+            print(&#34;Closing system...&#34;)
+            run_event.clear()
+            scraper_worker.join()
+            summarier_worker.join()
+            print(&#34;System closed.&#34;)
+        return self.__checkpoints</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="news.News.News"><code class="flex name class">
+<span>class <span class="ident">News</span></span>
+<span>(</span><span>delay: float = 3600, trace_limit: int = 12, summarize_algorithm: str = 'text_rank', compression_rate: float = 0.6, checkpoints: dict = {})</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Main package that used to run automatic news summarization from online news source </p>
+<p>A News class contructor</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>delay</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Delay time in seconds before repete an automatic news scraping system, by default 3600</dd>
+<dt><strong><code>trace_limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>A number of News to be scrape in each repeat cycle, by default 12</dd>
+<dt><strong><code>summarize_algorithm</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>A summarize algorithm name that can select betweet 'text_rank' and 'sentence_rank', by default 'text_rank'</dd>
+<dt><strong><code>compression_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Original News compression rate, by default .6</dd>
+<dt><strong><code>checkpoints</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dictionary contain publisher name as a key and list of news ids as a value, by default {}</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class News:
+    &#39;&#39;&#39; Main package that used to run automatic news summarization from online news source &#39;&#39;&#39;
+    def __init__(
+        self, 
+        delay:float = 3600, 
+        trace_limit:int = 12, 
+        summarize_algorithm:str = &#39;text_rank&#39;,
+        compression_rate:float = .6,
+        checkpoints:dict = {}
+        ) -&gt; None:
+        &#34;&#34;&#34;A News class contructor
+
+        Parameters
+        ----------
+        delay : float, optional
+            Delay time in seconds before repete an automatic news scraping system, by default 3600
+        trace_limit : int, optional
+            A number of News to be scrape in each repeat cycle, by default 12
+        summarize_algorithm : str, optional
+            A summarize algorithm name that can select betweet &#39;text_rank&#39; and &#39;sentence_rank&#39;, by default &#39;text_rank&#39;
+        compression_rate : float, optional
+            Original News compression rate, by default .6
+        checkpoints : dict, optional
+            A dictionary contain publisher name as a key and list of news ids as a value, by default {}
+        &#34;&#34;&#34;        
+        self.__delay = delay
+        self.__trace_limit = trace_limit
+        self.__summarize_algorithm = summarize_algorithm
+        self.__compression_rate = compression_rate
+        self.__news_scraper = NewsScraper(max_trace_limit=trace_limit)
+        self.__checkpoints = checkpoints if bool(checkpoints) else {
+            &#39;sanook&#39; : []
+        }
+    
+    def __update_checkpoint(self, latest_news_ids:Dict[str, str]) -&gt; None:
+        &#34;&#34;&#34;Update current checkpoint, where checkpoint is the list of latest news ids
+
+        Parameters
+        ----------
+        latest_news_ids : Dict[str, str]
+            Latest News ids in previous trace batch
+        &#34;&#34;&#34;        
+        for publisher in latest_news_ids:
+            latest_news = []
+            if len(latest_news_ids[publisher]) == 0:
+                continue
+            else:
+                self.__checkpoints[publisher] = latest_news_ids[publisher]
+                    #if news_id not in self.__checkpoints:
+                    #    if len(self.__checkpoints[publisher]) &gt; 0:
+                    #        self.__checkpoints[publisher].pop()
+                    #    self.__checkpoints[publisher].insert(0, news_id)
+
+    def __auto_scrape(self, name=None, run_event=None) -&gt; None:
+        &#34;&#34;&#34;Automatic scrape news from online news source
+
+        Parameters
+        ----------
+        name : Thread, optional
+            thread name, by default None
+        run_event : Thread, optional
+            run thread event, by default None
+        &#34;&#34;&#34;        
+        print(&#39;Scraper worker is starting...&#39;)
+        api_connector = ApiConnector()
+        while run_event.is_set():
+            urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=[])
+            if latest_news_ids[&#39;sanook&#39;] != self.__checkpoints[&#39;sanook&#39;]:
+                for index in range(len(latest_news_ids[&#39;sanook&#39;])):
+                    if latest_news_ids[&#39;sanook&#39;][index] in self.__checkpoints[&#39;sanook&#39;]:
+                        continue
+                    scraped_news = self.__news_scraper.scrape(urls[index])
+                    api_connector.setModel(&#39;raw&#39;)
+                    for news in scraped_news:
+                        status_code, status_text = api_connector.post(news)
+                        if not status_code in api_connector.PASS_STATUS:
+                            print(&#34;Bad status code at post raw news :&#34;, status_code)
+                            continue
+                        else:
+                            print(&#34;Raw news pushed.&#34;)
+                self.__update_checkpoint(latest_news_ids)
+            print(&#39;Scraper is sleeping now...&#39;)
+            time.sleep(self.__delay)
+
+    def __auto_summarize(self, name=None, run_event=None) -&gt; None:
+        &#34;&#34;&#34;Automatic summarize scraped news that has been collected in New-sREST api
+
+        Parameters
+        ----------
+        name : Thread, optional
+            thread name, by default None
+        run_event : Thread, optional
+            run thread event, by default None
+
+        &#34;&#34;&#34;        
+        print(&#39;Summarize worker is starting...&#39;)
+        failed_mark_as_summarized = []
+        raw_connector = ApiConnector()
+        summarized_connector = ApiConnector()
+        raw_connector.setModel(&#39;raw&#39;)
+        summarized_connector.setModel(&#39;summarized&#39;)
+        while run_event.is_set():
+            try:
+                get_raw_params = {&#39;limit&#39;:24, &#39;summarizeStatus&#39;: &#39;false&#39;}
+                status_code, raw_news = raw_connector.get(get_raw_params)
+                if len(raw_news) != 0:
+                    for news in raw_news:
+                        if type(news[&#39;_id&#39;]) != str:
+                            if news[&#39;_id&#39;] in failed_mark_as_summarized:
+                                continue
+                        mark_as_summarized = news[&#39;_id&#39;]
+                        summarized_news = summarize(news[&#39;content&#39;], self.__compression_rate, lang=&#39;th&#39;, algorithm=self.__summarize_algorithm)
+                        if len(summarized_news) == 0: # return nothing from summarize system
+                            try_different_algo = &#39;sentence_rank&#39; if self.__summarize_algorithm == &#39;text_rank&#39; else &#39;text_rank&#39;
+                            summarized_news = summarize(news[&#39;content&#39;], self.__compression_rate, lang=&#39;th&#39;, algorithm=try_different_algo)
+                        news[&#39;content&#39;] = summarized_news if bool(summarized_news) else news[&#39;content&#39;]
+                        del(news[&#39;_id&#39;])
+                        del(news[&#39;__v&#39;])
+                        del(news[&#39;insertDt&#39;])
+                        del(news[&#39;summarizeStatus&#39;])
+                        status_code, status_text = summarized_connector.post(news)
+                        if not status_code in summarized_connector.PASS_STATUS:
+                            print(&#34;Bad status code at post summarized news :&#34;, status_code)
+                            continue
+                        else:
+                            print(&#34;Summarized news pushed&#34;)
+                        status_code, status_text = raw_connector.put(mark_as_summarized, {&#34;summarizeStatus&#34;: &#39;true&#39;})
+                        if not status_code in raw_connector.PASS_STATUS:
+                            print(&#34;Failed to re-assign summarizeStatus with bad code :&#34;, status_code)
+                            failed_mark_as_summarized.append(mark_as_summarized)
+                        else:
+                            print(&#34;Re-assign summarizeStatus completed on raw news id {}&#34;.format(mark_as_summarized))
+                if len(failed_mark_as_summarized) != 0:
+                    for i in range(0, len(failed_mark_as_summarized)):
+                        status_code, status_text = raw_connector.put(failed_mark_as_summarized[i], {&#34;summarizeStatus&#34;: True})
+                        if not status_code in raw_connector.PASS_STATUS:
+                            print(&#34;Failed to re-assign summarizeStatus with bad code :&#34;, status_code)
+                        else:
+                            print(&#34;Re-assign summarizeStatus completed on raw news id {}&#34;.format(mark_as_summarized))
+                            del(failed_mark_as_summarized[i])
+                #time.sleep(self.__delay/2)
+            except:
+                print(&#39;Some error occur in auto_summarize&#39;)
+
+    def start(self) -&gt; Dict[str, list]:
+        &#34;&#34;&#34;Start automatic news scraping and summarizing system
+
+        Returns
+        -------
+        Dict[str, list]
+            A dictionary that represented a checkpoint news of each publishers
+        &#34;&#34;&#34;        
+        run_event = threading.Event()
+        run_event.set()
+        scraper_worker = threading.Thread(target=self.__auto_scrape, args=(&#39;scraper&#39;, run_event))
+        summarier_worker = threading.Thread(target=self.__auto_summarize, args=(&#39;scraper&#39;, run_event))
+        scraper_worker.start()
+        summarier_worker.start()
+        print(&#34;System started.&#34;)
+        try:
+            while True:
+                #print(&#39;Delay...&#39;)
+                time.sleep(self.__delay)
+        except KeyboardInterrupt:
+            print(&#34;Closing system...&#34;)
+            run_event.clear()
+            scraper_worker.join()
+            summarier_worker.join()
+            print(&#34;System closed.&#34;)
+        return self.__checkpoints</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="news.News.News.start"><code class="name flex">
+<span>def <span class="ident">start</span></span>(<span>self) -> Dict[str, list]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Start automatic news scraping and summarizing system</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Dict[str, list]</code></dt>
+<dd>A dictionary that represented a checkpoint news of each publishers</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start(self) -&gt; Dict[str, list]:
+    &#34;&#34;&#34;Start automatic news scraping and summarizing system
+
+    Returns
+    -------
+    Dict[str, list]
+        A dictionary that represented a checkpoint news of each publishers
+    &#34;&#34;&#34;        
+    run_event = threading.Event()
+    run_event.set()
+    scraper_worker = threading.Thread(target=self.__auto_scrape, args=(&#39;scraper&#39;, run_event))
+    summarier_worker = threading.Thread(target=self.__auto_summarize, args=(&#39;scraper&#39;, run_event))
+    scraper_worker.start()
+    summarier_worker.start()
+    print(&#34;System started.&#34;)
+    try:
+        while True:
+            #print(&#39;Delay...&#39;)
+            time.sleep(self.__delay)
+    except KeyboardInterrupt:
+        print(&#34;Closing system...&#34;)
+        run_event.clear()
+        scraper_worker.join()
+        summarier_worker.join()
+        print(&#34;System closed.&#34;)
+    return self.__checkpoints</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="news" href="index.html">news</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="news.News.News" href="#news.News.News">News</a></code></h4>
+<ul class="">
+<li><code><a title="news.News.News.start" href="#news.News.News.start">start</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
