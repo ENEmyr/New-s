@@ -43,15 +43,18 @@ class News:
         while run_event.is_set():
             urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=[])
             if latest_news_ids['sanook'] != self.__checkpoints['sanook']:
-                scraped_news = self.__news_scraper.scrape(urls)
-                api_connector.setModel('raw')
-                for news in scraped_news:
-                    status_code, status_text = api_connector.post(news)
-                    if not status_code in api_connector.PASS_STATUS:
-                        print("Bad status code at post raw news :", status_code)
+                for index in range(len(latest_news_ids['sanook'])):
+                    if latest_news_ids['sanook'][index] in self.__checkpoints['sanook']:
                         continue
-                    else:
-                        print("Raw news pushed.")
+                    scraped_news = self.__news_scraper.scrape(urls[index])
+                    api_connector.setModel('raw')
+                    for news in scraped_news:
+                        status_code, status_text = api_connector.post(news)
+                        if not status_code in api_connector.PASS_STATUS:
+                            print("Bad status code at post raw news :", status_code)
+                            continue
+                        else:
+                            print("Raw news pushed.")
                 self.__update_checkpoint(latest_news_ids)
             print('Sleeping now')
             time.sleep(self.__delay)
@@ -105,8 +108,8 @@ class News:
                 time.sleep(self.__delay/2)
             except:
                 print('Some error occur in auto_summarize')
-    # in progress
-    def run_tasks(self):
+
+    def start(self):
         run_event = threading.Event()
         run_event.set()
         scraper_worker = threading.Thread(target=self.__auto_scrape, args=('scraper', run_event))
@@ -123,16 +126,5 @@ class News:
             run_event.clear()
             scraper_worker.join()
             summarier_worker.join()
-            print("System closed.")
-        return self.__checkpoints
-
-    def start(self):
-        try:
-            print('System started.')
-            while True:
-                asyncio.run(self.__auto_scrape())
-                asyncio.run(self.__auto_summarize())
-                time.sleep(self.__delay)
-        except KeyboardInterrupt:
             print("System closed.")
         return self.__checkpoints
