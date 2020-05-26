@@ -61,7 +61,10 @@ class SanookScraper(Scraper):
             data = response.json()
         except:
             raise Exception('Call Sanook api failed.')
-        edges = data['data']['entries']['edges']
+        try:
+            edges = data['data']['entries']['edges']
+        except:
+            print(data)
         traced_urls = []
         for edge in edges:
             node = edge['node']

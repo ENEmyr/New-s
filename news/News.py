@@ -31,9 +31,7 @@ class News:
             if len(latest_news_ids[publisher]) == 0:
                 continue
             else:
-                for news_id in latest_news_ids[publisher]:
-                    if len(self.__checkpoints[publisher]) > 0:
-                        self.__checkpoints[publisher] = latest_news_ids[publisher]
+                self.__checkpoints[publisher] = latest_news_ids[publisher]
                     #if news_id not in self.__checkpoints:
                     #    if len(self.__checkpoints[publisher]) > 0:
                     #        self.__checkpoints[publisher].pop()
@@ -43,25 +41,20 @@ class News:
         print('Scraper worker is starting...')
         api_connector = ApiConnector()
         while run_event.is_set():
-            try:
-                urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=[])
-                if latest_news_ids['sanook'] != self.__checkpoints['sanook']:
-                    for news_id in latest_news_ids['sanook']:
-                        if news_id not in self.__checkpoints['sanook']:
-                            scraped_news = self.__news_scraper.scrape()
-                            api_connector.setModel('raw')
-                            for news in scraped_news:
-                                status_code, status_text = api_connector.post(news)
-                                if not status_code in api_connector.PASS_STATUS:
-                                    print("Bad status code at post raw news :", status_code)
-                                    continue
-                                else:
-                                    print("Raw news pushed.")
-                    self.__update_checkpoint(latest_news_ids)
-                print('Sleeping now')
-                time.sleep(self.__delay)
-            except:
-                pass
+            urls, latest_news_ids = self.__news_scraper.trace(limit=self.__trace_limit, checkpoint=[])
+            if latest_news_ids['sanook'] != self.__checkpoints['sanook']:
+                scraped_news = self.__news_scraper.scrape(urls)
+                api_connector.setModel('raw')
+                for news in scraped_news:
+                    status_code, status_text = api_connector.post(news)
+                    if not status_code in api_connector.PASS_STATUS:
+                        print("Bad status code at post raw news :", status_code)
+                        continue
+                    else:
+                        print("Raw news pushed.")
+                self.__update_checkpoint(latest_news_ids)
+            print('Sleeping now')
+            time.sleep(self.__delay)
 
     def __auto_summarize(self, name=None, run_event=None):
         print('Summarize worker is starting...')
@@ -111,8 +104,7 @@ class News:
                             del(failed_mark_as_summarized[i])
                 time.sleep(self.__delay/2)
             except:
-                pass
-    
+                print('Some error occur in auto_summarize')
     # in progress
     def run_tasks(self):
         run_event = threading.Event()
