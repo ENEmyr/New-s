@@ -150,12 +150,12 @@ class News:
             except:
                 print('Some error occur in auto_summarize')
 
-    def start(self) -> Dict[list]:
+    def start(self) -> Dict[str, list]:
         """Start automatic news scraping and summarizing system
 
         Returns
         -------
-        Dict[list]
+        Dict[str, list]
             A dictionary that represented a checkpoint news of each publishers
         """        
         run_event = threading.Event()
