@@ -146,9 +146,9 @@ class News:
                         else:
                             print("Re-assign summarizeStatus completed on raw news id {}".format(mark_as_summarized))
                             del(failed_mark_as_summarized[i])
-                #time.sleep(self.__delay/2)
-            except:
-                print('Some error occur in auto_summarize')
+                time.sleep(1)
+            except Exception as e:
+                print('Some error occur in auto_summarize', e)
 
     def start(self) -> Dict[str, list]:
         """Start automatic news scraping and summarizing system

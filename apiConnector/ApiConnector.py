@@ -18,6 +18,7 @@ class ApiConnector:
         self.__point2model = self.__RAW_MODEL
         self.__token = token or config.Token
         self.__headers = {'Content-Type': 'application/json',
+                          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
                           'Authorization': 'Bearer {}'.format(self.__token)}
     
     @property

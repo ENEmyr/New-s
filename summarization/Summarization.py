@@ -41,4 +41,9 @@ def summarize(document:str, compression_rate:float = 0.60, lang:str = 'th', algo
         summarizer = SentenceRank(compression_rate, lang)
     else:
         summarizer = TextRank(compression_rate, lang)
-    return summarizer.summarize(document, merge_sentences=True)
+    try:
+        summarized = summarizer.summarize(document, merge_sentences=True)
+    except:
+        print('Error occur while summrizing...')
+        summarized = document
+    return summarized
